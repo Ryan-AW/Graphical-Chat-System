@@ -32,10 +32,6 @@ class Server:
         while (True):
             try:
                 data = conn.recv(bufsize)
-                if (data.decode() == "SENDING-FILE"):
-                    FileName = conn.recv(bufsize).decode(); FileSize = int(conn.recv(bufsize))
-                    data = b"FILE-SENDING"
-
                 for connection in self.connections:
                     connection.send(bytes(f"({username}): {data.decode()}", "utf-8"))
                 if not data:
