@@ -7,3 +7,5 @@ This Chat System works on any Local Area Network and can be extended to work any
 [+] Clients (chat.py) must be binded to the Server IP Address
 
 [+] No Limit to how many clients can connect to the server
+
+![](images/ChatInterface.png)
