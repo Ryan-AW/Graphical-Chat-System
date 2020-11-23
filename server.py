@@ -11,12 +11,6 @@ users = []
 
 os.system("clear" if os.name == "posix" else "cls")
 
-def recvall(buffer):
-    data = b""
-    while (len(data) < buffer):
-        data += conn.recv(buffer)
-    return data
-
 # Main Server System
 class Server:
     objSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
