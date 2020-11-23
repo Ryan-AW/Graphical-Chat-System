@@ -24,12 +24,6 @@ ServerIP = ""
 PORT = 10000
 bufsize = 0x400
 
-def recvall(buffer):
-    data = b""
-    while (len(data) < buffer):
-        data += objSocket.recv(buffer)
-    return data
-
 # Main Chat Window
 class ChatWindow(QDialog):
 
