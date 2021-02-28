@@ -8,4 +8,4 @@ This Chat System works on any Local Area Network and can be extended to work any
 
 [+] No Limit to how many clients can connect to the server
 
-![](images/ChatInterface.png)
+![](images/interface.png)
