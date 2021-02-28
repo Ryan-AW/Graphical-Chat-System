@@ -1,0 +1,27 @@
+#StatusLabel, #UsernameLabel, #ServerIPLabel {
+    color: grey;
+    font-size: 19px;
+}
+
+#ServerStatusLabel {
+    color: red;
+    font-size: 19px;
+}
+
+#UsernameInput, #ServerIPInput {
+    color: green;
+    font-weight: bold;
+    height: 20%;
+    width: 80%;
+}
+
+#ConnectButton, #DisconnectButton, #ClearButton {
+    color: blue;
+    height: 15%;
+    width: 60%;
+}
+
+#SendMessageButton {
+    color: white;
+    font-size: 15px;
+}
