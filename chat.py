@@ -39,7 +39,7 @@ class ChatWindow(QDialog):
 
         # Display Window Title
         self.setWindowTitle(WindowTitle)
-        self.setWindowIcon(QtGui.QIcon("images/Chat_Icon.png"))
+        self.setWindowIcon(QtGui.QIcon("images/icon.png"))
         self.setStyleSheet(f"background: {BackgroundColour}")
 
         # Display Server Status
