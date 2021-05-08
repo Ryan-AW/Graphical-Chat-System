@@ -6,14 +6,20 @@ import os
 # Encryption Library
 from cryptography.fernet import Fernet
 
+# Third Party Libraries
+from prettytable import PrettyTable
+
 # Connection Properties
 SERVER = "0.0.0.0"
 PORT = 5005
 BUFFER = 1024
 KEY = Fernet.generate_key()
 
-users = []
 conn = None
+users = []
+
+table = PrettyTable()
+table.field_names = ["Username", "IP Address"]
 
 os.system("clear" if os.name == "posix" else "cls")
 
@@ -31,24 +37,37 @@ class Server:
         while (True):
             try:
                 data = Fernet(KEY).decrypt(conn.recv(BUFFER))
-                print(f"{username}: {str(data, 'utf-8')}")
+                print(f"{username[0]}: {str(data, 'utf-8')}")
 
                 for connection in self.connections:
-                    connection.send(Fernet(KEY).encrypt(bytes(f"({username}): {data.decode()}", "utf-8")))
+                    connection.send(Fernet(KEY).encrypt(bytes(f"({username[0]}): {data.decode()}", "utf-8")))
                 if not data:
                     raise Exception
             except:
-                print(f"({str(username)}) has Disconnected")
+                print(f"({str(username[0])}) has Disconnected")
 
                 users.remove(username)
                 self.connections.remove(conn); conn.close()
 
-                for connection in self.connections: connection.send(Fernet(KEY).encrypt(bytes(f"[{username}] has disconnected", "utf-8")))
+                for connection in self.connections: connection.send(Fernet(KEY).encrypt(bytes(f"[{username[0]}] has disconnected", "utf-8")))
                 break
 
             finally:
-                if (len(self.connections) == 0):
-                    users.clear()
+                if (len(self.connections) == 0): users.clear()
+
+    def info(self):
+        while (True):
+            choice = input().lower()
+            if (choice == "clients" or choice == "users"):
+                for user in users:
+                    table.add_row([user[0], user[1]])
+
+                if (len(table._rows) == 0):
+                    print("-"*25 + "\n[!] No Clients Connected\n" + "-"*25)
+                else:
+                    print(table)
+
+            table.clear_rows()
 
 
     def run(self):
@@ -59,18 +78,22 @@ class Server:
                 conn, address = self.objSocket.accept()
 
                 conn.send(KEY)
-                username = str(Fernet(KEY).decrypt(conn.recv(BUFFER)), "utf-8")
+                username = [str(Fernet(KEY).decrypt(conn.recv(BUFFER)), "utf-8")] + [address[0]]
                 users.append(username)
 
                 t = threading.Thread(target=self.handler, args=(conn, username))
                 t.daemon = True
                 t.start()
 
+                t2 = threading.Thread(target=self.info)
+                t2.daemon = True
+                t2.start()
+
                 for connection in self.connections:
-                    connection.send(Fernet(KEY).encrypt(bytes(f"[{username}] has connected", "utf-8")))
+                    connection.send(Fernet(KEY).encrypt(bytes(f"[{username[0]}] has connected", "utf-8")))
 
                 self.connections.append(conn)
-                print(f"({str(username)}) has Connected")
+                print(f"({str(username[0])}) has Connected")
 
             except KeyboardInterrupt:
                 print("\nConnection has been Terminated. All Clients Disconnected")
