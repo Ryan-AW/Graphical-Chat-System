@@ -1,37 +1,40 @@
 # Standard Libraries
 import socket
 import threading
-import time
 import os
 
+# Encryption Library
+from cryptography.fernet import Fernet
+
 # Connection Properties
-HOST = "0.0.0.0"
-PORT = 10000
-buffer = 1024
+SERVER = "0.0.0.0"
+PORT = 5005
+BUFFER = 1024
+KEY = Fernet.generate_key()
 
 users = []
 conn = None
 
 os.system("clear" if os.name == "posix" else "cls")
 
-# Main Server System
 class Server:
     objSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     objSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     connections = []
 
     def __init__(self):
-        self.objSocket.bind((HOST, PORT))
+        self.objSocket.bind((SERVER, PORT))
         self.objSocket.listen(socket.SOMAXCONN)
-        print("(Listening for Incoming Connections)\n" + "-"*36)
+        print("<Server Log Active>\n" + "-"*19)
 
     def handler(self, conn, username):
         while (True):
             try:
-                data = conn.recv(buffer)
-                print(f"{username}: " + data.decode())
+                data = Fernet(KEY).decrypt(conn.recv(BUFFER))
+                print(f"{username}: {str(data, 'utf-8')}")
+
                 for connection in self.connections:
-                    connection.send(bytes(f"({username}): {data.decode()}|" + " ".join(users), "utf-8"))
+                    connection.send(Fernet(KEY).encrypt(bytes(f"({username}): {data.decode()}", "utf-8")))
                 if not data:
                     raise Exception
             except:
@@ -40,17 +43,13 @@ class Server:
                 users.remove(username)
                 self.connections.remove(conn); conn.close()
 
-                for connection in self.connections:
-                    connection.send(bytes(f"[{username}] has disconnected", "utf-8"))
-
+                for connection in self.connections: connection.send(Fernet(KEY).encrypt(bytes(f"[{username}] has disconnected", "utf-8")))
                 break
 
             finally:
                 if (len(self.connections) == 0):
-                    users.clear(); time.sleep(2)
+                    users.clear()
 
-                    os.system("clear" if os.name == "posix" else "cls")
-                    print("<No Users in Chat>")
 
     def run(self):
         global conn
@@ -59,14 +58,16 @@ class Server:
             try:
                 conn, address = self.objSocket.accept()
 
-                username = conn.recv(buffer).decode()
+                conn.send(KEY)
+                username = str(Fernet(KEY).decrypt(conn.recv(BUFFER)), "utf-8")
                 users.append(username)
 
-                thread = threading.Thread(target=self.handler, args=(conn, username))
-                thread.daemon = True; thread.start()
+                t = threading.Thread(target=self.handler, args=(conn, username))
+                t.daemon = True
+                t.start()
 
                 for connection in self.connections:
-                    connection.send(bytes(f"[{username}] has connected", "utf-8"))
+                    connection.send(Fernet(KEY).encrypt(bytes(f"[{username}] has connected", "utf-8")))
 
                 self.connections.append(conn)
                 print(f"({str(username)}) has Connected")
