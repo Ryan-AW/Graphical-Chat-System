@@ -11,4 +11,5 @@ This Chat System works on any Local Area Network and can be extended to work any
 - (chat.py) must be binded to the Server IP Address
 - ability to send and receive messages with end-to-end encryption
 
+
 ![](images/interface.png)
