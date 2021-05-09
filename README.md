@@ -7,6 +7,7 @@ This Chat System works on any Local Area Network and can be extended to work any
 - ability to log all messages and display connected users
 - no limit to how many clients can connect
 
+
 <Client>
 - (chat.py) must be binded to the Server IP Address
 - ability to send and receive messages with end-to-end encryption
