@@ -55,7 +55,7 @@ class Server:
             finally:
                 if (len(self.connections) == 0): users.clear()
 
-    def getInfo(self, conn):
+    def getInfo(self):
         while (True):
             choice = input()
             for user in users:
@@ -78,28 +78,37 @@ class Server:
 
                 conn.send(KEY)
                 username = [str(Fernet(KEY).decrypt(conn.recv(BUFFER)), "utf-8")] + [address[0]]
-                users.append(username)
+                for user in users:
+                    if (username[0] == user[0]):
+                        conn.send(Fernet(KEY).encrypt(b"invalid"))
 
-                t = threading.Thread(target=self.handler, args=(conn, username))
-                t.daemon = True
-                t.start()
+                        conn.close()
+                        break
 
-                t2 = threading.Thread(target=self.getInfo, args=(conn,))
-                t2.daemon = True
-                t2.start()
+                else:
+                    conn.send(Fernet(KEY).encrypt(b"valid"))
+                    users.append(username)
 
-                for connection in self.connections:
-                    connection.send(Fernet(KEY).encrypt(bytes(f"[{username[0]}] has connected", "utf-8")))
+                    t = threading.Thread(target=self.handler, args=(conn, username))
+                    t.daemon = True
+                    t.start()
 
-                self.connections.append(conn)
-                print(f"({str(username[0])}) has Connected")
+                    t2 = threading.Thread(target=self.getInfo)
+                    t2.daemon = True
+                    t2.start()
+
+                    for connection in self.connections:
+                        connection.send(Fernet(KEY).encrypt(bytes(f"[{username[0]}] has connected", "utf-8")))
+
+                    self.connections.append(conn)
+                    print(f"({str(username[0])}) has Connected")
 
             except KeyboardInterrupt:
                 print("\nConnection has been Terminated. All Clients Disconnected")
                 exit(1)
 
             except Exception as e:
-                print(f"[-] Error Accepting Connection\nError Message: ({e})")
+                print(f"[!] Error Accepting Connection\nError Message: ({e})")
                 exit(1)
 
 server = Server()
