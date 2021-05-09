@@ -186,6 +186,11 @@ class ClientThread(threading.Thread):
         KEY = objSocket.recv(1024)
         objSocket.send(Fernet(KEY).encrypt(bytes(username, "utf-8")))
 
+        if (Fernet(KEY).decrypt(objSocket.recv(BUFFER)) == b"invalid"):
+            self.window.ChatBox.append("Username has already been taken")
+            self.window.Disconnected()
+            exit(1)
+
         self.window.ServerStatusLabel.setText("Connected")
         self.window.ServerStatusLabel.setStyleSheet("color: green")
 
